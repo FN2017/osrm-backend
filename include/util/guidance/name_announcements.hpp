@@ -135,12 +135,13 @@ inline bool requiresNameAnnounced(const std::string &from_name,
 
     const auto checkForPrefixOrSuffixChange =
         [](const std::string &first, const std::string &second, const SuffixTable &suffix_table) {
+            if (first.empty() && second.empty()) return false;
             std::string first_prefix, first_suffix, second_prefix, second_suffix;
             std::tie(first_prefix, first_suffix, second_prefix, second_suffix) =
                 decompose(first, second);
 
             const auto checkTable = [&](const std::string &str) {
-                return !str.empty() && suffix_table.isSuffix(str);
+                return str.empty() || suffix_table.isSuffix(str);
             };
 
             return checkTable(first_prefix) && checkTable(first_suffix) &&
