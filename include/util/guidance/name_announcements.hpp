@@ -130,7 +130,7 @@ inline bool requiresNameAnnounced(const std::string &from_name,
 
     // check similarity of names
     const auto names_are_empty = from_name.empty() && to_name.empty();
-    const auto name_is_contained =
+    const auto name_is_contained = names_are_empty ? false :
         boost::starts_with(from_name, to_name) || boost::starts_with(to_name, from_name);
 
     const auto checkForPrefixOrSuffixChange =
@@ -140,7 +140,7 @@ inline bool requiresNameAnnounced(const std::string &from_name,
                 decompose(first, second);
 
             const auto checkTable = [&](const std::string &str) {
-                return str.empty() || suffix_table.isSuffix(str);
+                return !str.empty() && suffix_table.isSuffix(str);
             };
 
             return checkTable(first_prefix) && checkTable(first_suffix) &&
@@ -222,16 +222,18 @@ inline bool requiresNameAnnounced(const NameID from_name_id,
                                   const util::NameTable &name_table,
                                   const extractor::SuffixTable &suffix_table)
 {
-    if (from_name_id == to_name_id)
+    auto from_ref = name_table.GetRefForID(from_name_id).to_string();
+    auto to_ref = name_table.GetRefForID(to_name_id).to_string();
+    if (from_name_id == to_name_id && from_ref == to_ref)
         return false;
     else
         return requiresNameAnnounced(name_table.GetNameForID(from_name_id).to_string(),
-                                     name_table.GetRefForID(from_name_id).to_string(),
+                                     from_ref,
                                      name_table.GetPronunciationForID(from_name_id).to_string(),
                                      name_table.GetExitsForID(from_name_id).to_string(),
                                      //
                                      name_table.GetNameForID(to_name_id).to_string(),
-                                     name_table.GetRefForID(to_name_id).to_string(),
+                                     to_ref,
                                      name_table.GetPronunciationForID(to_name_id).to_string(),
                                      name_table.GetExitsForID(to_name_id).to_string(),
                                      //
@@ -243,16 +245,20 @@ inline bool requiresNameAnnounced(const NameID from_name_id,
                                   const NameID to_name_id,
                                   const util::NameTable &name_table)
 {
-    if (from_name_id == to_name_id)
+    auto from_ref = name_table.GetRefForID(from_name_id).to_string();
+    auto to_ref = name_table.GetRefForID(to_name_id).to_string();
+    if (from_name_id == to_name_id && from_ref == to_ref)
+    {
         return false;
+    }
     else
         return requiresNameAnnounced(name_table.GetNameForID(from_name_id).to_string(),
-                                     name_table.GetRefForID(from_name_id).to_string(),
+                                     from_ref,
                                      name_table.GetPronunciationForID(from_name_id).to_string(),
                                      name_table.GetExitsForID(from_name_id).to_string(),
                                      //
                                      name_table.GetNameForID(to_name_id).to_string(),
-                                     name_table.GetRefForID(to_name_id).to_string(),
+                                     to_ref,
                                      name_table.GetExitsForID(to_name_id).to_string(),
                                      name_table.GetPronunciationForID(to_name_id).to_string());
     // FIXME: converts StringViews to strings since the name change heuristics mutates in place

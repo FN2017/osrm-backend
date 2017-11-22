@@ -1397,5 +1397,38 @@ Feature: Simple Turns
             | ce    | residential |      | Heinrichshöhe |
 
        When I route I should get
-            | waypoints | route     | turns                    |
-            | a,f       | abc,cf,cf | depart,turn right,arrive |
+            | waypoints | route | turns                    |
+            | a,f       | ,,    | depart,turn right,arrive |
+
+    # https://www.openstreetmap.org/#map=17/52.23966/10.29251
+    Scenario: Turn for roads with no name, ref changes
+        Given the node map
+            """
+              o
+              .
+              .
+              x
+              .
+             . .
+       a....c...d....b
+             . .
+              .
+              .
+              y
+              .
+              .
+              z
+            """
+
+        And the ways
+            | nodes  | highway     | ref  | name          | oneway |
+            | acdb   | primary     | B 1  |               | no     |
+            | oxc    | tertiary    | K 23 |               | yes    |
+            | cyz    | tertiary    | K 23 |               | yes    |
+            | dxo    | tertiary    | K 23 |               | yes    |
+            | zyd    | tertiary    | K 23 |               | yes    |
+
+       When I route I should get
+            | waypoints | route | turns                          |
+            | a,z       | ,,    | depart,turn right,arrive       |
+            | a,o       | ,,    | depart,turn sharp left,arrive  |
